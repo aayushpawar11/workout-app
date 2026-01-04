@@ -14,7 +14,7 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
-		A0FFFFFF /* workout-app.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "workout-app.app"; sourceTree = BUILT_PRODUCTS_DIR; };
+		A0FFFFF1 /* workout-app.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "workout-app.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		A1000000 /* workout_appApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = workout_appApp.swift; sourceTree = "<group>"; };
 		A1000002 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
 		A1000004 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
@@ -36,7 +36,7 @@
 			isa = PBXGroup;
 			children = (
 				A0FFFFF9 /* workout-app */,
-				A0FFFFFF /* Products */,
+				A0FFFFF6 /* Products */,
 			);
 			sourceTree = "<group>";
 		};
@@ -59,10 +59,10 @@
 			path = "Preview Content";
 			sourceTree = "<group>";
 		};
-		A0FFFFFF /* Products */ = {
+		A0FFFFF6 /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				A0FFFFFF /* workout-app.app */,
+				A0FFFFF1 /* workout-app.app */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -76,7 +76,7 @@
 			buildPhases = (
 				A0FFFFFC /* Sources */,
 				A0FFFFFE /* Frameworks */,
-				A0FFFFFF /* Resources */,
+				A0FFFFF0 /* Resources */,
 			);
 			buildRules = (
 			);
@@ -84,7 +84,7 @@
 			);
 			name = "workout-app";
 			productName = "workout-app";
-			productReference = A0FFFFFF /* workout-app.app */;
+			productReference = A0FFFFF1 /* workout-app.app */;
 			productType = "com.apple.product-type.application";
 		};
 /* End PBXNativeTarget section */
@@ -106,7 +106,7 @@
 				Base,
 			);
 			mainGroup = A0FFFFF8;
-			productRefGroup = A0FFFFFF /* Products */;
+			productRefGroup = A0FFFFF6 /* Products */;
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
@@ -116,7 +116,7 @@
 /* End PBXProject section */
 
 /* Begin PBXResourcesBuildPhase section */
-		A0FFFFFF /* Resources */ = {
+		A0FFFFF0 /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
