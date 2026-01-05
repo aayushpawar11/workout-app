@@ -11,31 +11,45 @@ struct GraphView: View {
     
     var body: some View {
         NavigationView {
-            VStack {
-                if allExercises.isEmpty {
-                    Text("No exercises yet. Create a workout and add exercises to track progress!")
-                        .foregroundColor(.secondary)
-                        .padding()
-                        .multilineTextAlignment(.center)
-                } else {
-                    Form {
-                        Section {
-                            Picker("Select Exercise", selection: $selectedExerciseId) {
-                                Text("Select an exercise").tag(nil as UUID?)
-                                ForEach(allExercises) { exercise in
-                                    Text(exercise.name).tag(exercise.id as UUID?)
+            ZStack {
+                Color.black.ignoresSafeArea()
+                
+                VStack {
+                    if allExercises.isEmpty {
+                        VStack(spacing: 20) {
+                            Image(systemName: "chart.line.uptrend.xyaxis")
+                                .font(.system(size: 60))
+                                .foregroundColor(.gray.opacity(0.5))
+                            Text("No Progress Data Yet")
+                                .font(.system(size: 24, weight: .semibold, design: .rounded))
+                                .foregroundColor(.white)
+                            Text("Create workouts and log exercises to track your progress!")
+                                .font(.subheadline)
+                                .foregroundColor(.gray)
+                                .multilineTextAlignment(.center)
+                                .padding(.horizontal)
+                        }
+                    } else {
+                        Form {
+                            Section {
+                                Picker("Select Exercise", selection: $selectedExerciseId) {
+                                    Text("Select an exercise").tag(nil as UUID?)
+                                    ForEach(allExercises) { exercise in
+                                        Text(exercise.name).tag(exercise.id as UUID?)
+                                    }
+                                }
+                            }
+                            
+                            if let exerciseId = selectedExerciseId,
+                               let exercise = allExercises.first(where: { $0.id == exerciseId }) {
+                                Section {
+                                    ExerciseChartView(exercise: exercise)
+                                } header: {
+                                    Text("Weight Progression")
                                 }
                             }
                         }
-                        
-                        if let exerciseId = selectedExerciseId,
-                           let exercise = allExercises.first(where: { $0.id == exerciseId }) {
-                            Section {
-                                ExerciseChartView(exercise: exercise)
-                            } header: {
-                                Text("Weight Progression")
-                            }
-                        }
+                        .scrollContentBackground(.hidden)
                     }
                 }
             }

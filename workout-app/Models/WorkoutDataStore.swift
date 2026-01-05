@@ -66,9 +66,18 @@ class WorkoutDataStore: ObservableObject {
     }
     
     private func loadWorkouts() {
-        if let data = UserDefaults.standard.data(forKey: workoutsKey),
-           let decoded = try? JSONDecoder().decode([Workout].self, from: data) {
-            workouts = decoded
+        guard let data = UserDefaults.standard.data(forKey: workoutsKey) else {
+            workouts = []
+            return
+        }
+        
+        do {
+            workouts = try JSONDecoder().decode([Workout].self, from: data)
+        } catch {
+            print("Error loading workouts: \(error)")
+            // If decoding fails, clear corrupted data
+            workouts = []
+            UserDefaults.standard.removeObject(forKey: workoutsKey)
         }
     }
     
@@ -79,9 +88,18 @@ class WorkoutDataStore: ObservableObject {
     }
     
     private func loadLogs() {
-        if let data = UserDefaults.standard.data(forKey: logsKey),
-           let decoded = try? JSONDecoder().decode([WorkoutLog].self, from: data) {
-            workoutLogs = decoded
+        guard let data = UserDefaults.standard.data(forKey: logsKey) else {
+            workoutLogs = []
+            return
+        }
+        
+        do {
+            workoutLogs = try JSONDecoder().decode([WorkoutLog].self, from: data)
+        } catch {
+            print("Error loading logs: \(error)")
+            // If decoding fails, clear corrupted data
+            workoutLogs = []
+            UserDefaults.standard.removeObject(forKey: logsKey)
         }
     }
 }

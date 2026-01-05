@@ -4,26 +4,27 @@ struct AddWorkoutView: View {
     @EnvironmentObject var dataStore: WorkoutDataStore
     @Environment(\.dismiss) var dismiss
     @State private var workoutName = ""
+    @FocusState private var isTextFieldFocused: Bool
     
     var body: some View {
-        NavigationView {
-            Form {
-                Section {
-                    TextField("Workout Name", text: $workoutName)
-                        .textInputAutocapitalization(.words)
-                } header: {
-                    Text("Workout Details")
-                }
-            }
-            .navigationTitle("New Workout")
-            .navigationBarTitleDisplayMode(.inline)
-            .toolbar {
-                ToolbarItem(placement: .navigationBarLeading) {
+        ZStack {
+            Color.black.ignoresSafeArea()
+            
+            VStack(spacing: 0) {
+                HStack {
                     Button("Cancel") {
                         dismiss()
                     }
-                }
-                ToolbarItem(placement: .navigationBarTrailing) {
+                    .foregroundColor(.white)
+                    
+                    Spacer()
+                    
+                    Text("New Workout")
+                        .font(.system(size: 18, weight: .semibold))
+                        .foregroundColor(.white)
+                    
+                    Spacer()
+                    
                     Button("Save") {
                         if !workoutName.isEmpty {
                             let workout = Workout(name: workoutName)
@@ -32,7 +33,28 @@ struct AddWorkoutView: View {
                         }
                     }
                     .disabled(workoutName.isEmpty)
+                    .foregroundColor(workoutName.isEmpty ? .gray : .yellow)
                 }
+                .padding()
+                
+                TextField("Workout Name", text: $workoutName)
+                    .textInputAutocapitalization(.words)
+                    .font(.system(size: 18))
+                    .foregroundColor(.white)
+                    .padding()
+                    .background(Color(white: 0.15))
+                    .cornerRadius(12)
+                    .padding()
+                    .focused($isTextFieldFocused)
+                    .submitLabel(.done)
+                    .onAppear {
+                        // Focus immediately when view appears
+                        DispatchQueue.main.async {
+                            isTextFieldFocused = true
+                        }
+                    }
+                
+                Spacer()
             }
         }
     }
@@ -42,4 +64,3 @@ struct AddWorkoutView: View {
     AddWorkoutView()
         .environmentObject(WorkoutDataStore())
 }
-

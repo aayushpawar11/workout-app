@@ -8,305 +8,121 @@ struct BodyDiagramView: View {
         Set(workout.exercises.flatMap { $0.muscleGroups })
     }
     
+    var targetedDetailedMuscles: [DetailedMuscle] {
+        workout.exercises.flatMap { $0.detailedMuscles }
+    }
+    
     var body: some View {
         NavigationView {
-            ScrollView {
-                VStack(spacing: 20) {
-                    Text(workout.name)
-                        .font(.title2)
-                        .fontWeight(.bold)
-                        .padding(.top)
-                    
-                    // Front View
-                    VStack {
-                        Text("FRONT VIEW")
-                            .font(.headline)
-                            .padding(.bottom, 10)
-                        
-                        ZStack {
-                            BodyFrontView()
-                            MuscleOverlayView(muscleGroups: targetedMuscleGroups, isFront: true)
+            ZStack {
+                // Modern gradient background
+                LinearGradient(
+                    gradient: Gradient(colors: [
+                        Color(red: 0.05, green: 0.05, blue: 0.1),
+                        Color(red: 0.1, green: 0.1, blue: 0.2)
+                    ]),
+                    startPoint: .topLeading,
+                    endPoint: .bottomTrailing
+                )
+                .ignoresSafeArea()
+                
+                ScrollView {
+                    VStack(spacing: 30) {
+                        // Header
+                        VStack(spacing: 8) {
+                            Text(workout.name)
+                                .font(.system(size: 32, weight: .bold, design: .rounded))
+                                .foregroundColor(.white)
+                            
+                            Text("\(workout.exercises.count) exercises")
+                                .font(.subheadline)
+                                .foregroundColor(.white.opacity(0.7))
                         }
-                        .frame(height: 400)
-                    }
-                    
-                    // Back View
-                    VStack {
-                        Text("BACK VIEW")
-                            .font(.headline)
-                            .padding(.bottom, 10)
+                        .padding(.top, 20)
                         
-                        ZStack {
-                            BodyBackView()
-                            MuscleOverlayView(muscleGroups: targetedMuscleGroups, isFront: false)
-                        }
-                        .frame(height: 400)
-                    }
-                    
-                    // Legend
-                    VStack(alignment: .leading, spacing: 10) {
-                        Text("Targeted Muscles")
-                            .font(.headline)
-                            .padding(.top)
-                        
-                        LazyVGrid(columns: [GridItem(.adaptive(minimum: 150))], spacing: 10) {
-                            ForEach(Array(targetedMuscleGroups), id: \.self) { group in
-                                HStack {
-                                    Circle()
-                                        .fill(group.color)
-                                        .frame(width: 20, height: 20)
-                                    Text(group.rawValue)
-                                        .font(.caption)
+                        // Exercise Breakdown Card
+                        VStack(alignment: .leading, spacing: 20) {
+                            Text("Exercise Breakdown")
+                                .font(.system(size: 24, weight: .bold, design: .rounded))
+                                .foregroundColor(.white)
+                                .padding(.horizontal)
+                            
+                            ForEach(workout.exercises) { exercise in
+                                VStack(alignment: .leading, spacing: 12) {
+                                    Text(exercise.name)
+                                        .font(.system(size: 18, weight: .semibold, design: .rounded))
+                                        .foregroundColor(.white)
+                                    
+                                    if !exercise.detailedMuscles.isEmpty {
+                                        ScrollView(.horizontal, showsIndicators: false) {
+                                            HStack(spacing: 10) {
+                                                ForEach(exercise.detailedMuscles, id: \.self) { muscle in
+                                                    HStack(spacing: 6) {
+                                                        Circle()
+                                                            .fill(muscle.color)
+                                                            .frame(width: 14, height: 14)
+                                                            .shadow(color: muscle.color.opacity(0.5), radius: 3)
+                                                        Text(muscle.rawValue)
+                                                            .font(.system(size: 12, weight: .medium, design: .rounded))
+                                                            .foregroundColor(.white)
+                                                    }
+                                                    .padding(.horizontal, 12)
+                                                    .padding(.vertical, 8)
+                                                    .background(
+                                                        Capsule()
+                                                            .fill(muscle.color.opacity(0.25))
+                                                            .overlay(
+                                                                Capsule()
+                                                                    .stroke(muscle.color.opacity(0.5), lineWidth: 1)
+                                                            )
+                                                    )
+                                                }
+                                            }
+                                            .padding(.horizontal, 4)
+                                        }
+                                    } else {
+                                        Text("No muscle analysis available")
+                                            .font(.caption)
+                                            .foregroundColor(.white.opacity(0.5))
+                                    }
                                 }
+                                .padding(20)
+                                .background(
+                                    RoundedRectangle(cornerRadius: 16)
+                                        .fill(Color.white.opacity(0.1))
+                                        .background(
+                                            RoundedRectangle(cornerRadius: 16)
+                                                .fill(.ultraThinMaterial)
+                                        )
+                                        .shadow(color: .black.opacity(0.2), radius: 8, x: 0, y: 4)
+                                )
                             }
                         }
+                        .padding(.horizontal)
+                        .padding(.bottom, 30)
                     }
-                    .padding()
                 }
             }
             .navigationTitle("Body Diagram")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .navigationBarTrailing) {
-                    Button("Done") {
+                    Button {
                         dismiss()
+                    } label: {
+                        Image(systemName: "xmark.circle.fill")
+                            .font(.title2)
+                            .foregroundColor(.white.opacity(0.8))
                     }
                 }
             }
-        }
-    }
-}
-
-struct BodyFrontView: View {
-    var body: some View {
-        GeometryReader { geometry in
-            Path { path in
-                let width = geometry.size.width
-                let height = geometry.size.height
-                
-                // Head
-                path.addEllipse(in: CGRect(x: width * 0.35, y: height * 0.05, width: width * 0.3, height: height * 0.12))
-                
-                // Neck
-                path.move(to: CGPoint(x: width * 0.42, y: height * 0.17))
-                path.addLine(to: CGPoint(x: width * 0.42, y: height * 0.22))
-                path.move(to: CGPoint(x: width * 0.58, y: height * 0.17))
-                path.addLine(to: CGPoint(x: width * 0.58, y: height * 0.22))
-                
-                // Shoulders
-                path.move(to: CGPoint(x: width * 0.3, y: height * 0.25))
-                path.addLine(to: CGPoint(x: width * 0.7, y: height * 0.25))
-                
-                // Arms
-                path.move(to: CGPoint(x: width * 0.3, y: height * 0.25))
-                path.addLine(to: CGPoint(x: width * 0.2, y: height * 0.45))
-                path.addLine(to: CGPoint(x: width * 0.18, y: height * 0.65))
-                
-                path.move(to: CGPoint(x: width * 0.7, y: height * 0.25))
-                path.addLine(to: CGPoint(x: width * 0.8, y: height * 0.45))
-                path.addLine(to: CGPoint(x: width * 0.82, y: height * 0.65))
-                
-                // Torso
-                path.move(to: CGPoint(x: width * 0.35, y: height * 0.25))
-                path.addLine(to: CGPoint(x: width * 0.35, y: height * 0.6))
-                path.addLine(to: CGPoint(x: width * 0.65, y: height * 0.6))
-                path.addLine(to: CGPoint(x: width * 0.65, y: height * 0.25))
-                path.closeSubpath()
-                
-                // Legs
-                path.move(to: CGPoint(x: width * 0.4, y: height * 0.6))
-                path.addLine(to: CGPoint(x: width * 0.38, y: height * 0.95))
-                
-                path.move(to: CGPoint(x: width * 0.6, y: height * 0.6))
-                path.addLine(to: CGPoint(x: width * 0.62, y: height * 0.95))
-            }
-            .stroke(Color.black, lineWidth: 2)
-        }
-    }
-}
-
-struct BodyBackView: View {
-    var body: some View {
-        GeometryReader { geometry in
-            Path { path in
-                let width = geometry.size.width
-                let height = geometry.size.height
-                
-                // Head (back)
-                path.addEllipse(in: CGRect(x: width * 0.35, y: height * 0.05, width: width * 0.3, height: height * 0.12))
-                
-                // Neck
-                path.move(to: CGPoint(x: width * 0.42, y: height * 0.17))
-                path.addLine(to: CGPoint(x: width * 0.42, y: height * 0.22))
-                path.move(to: CGPoint(x: width * 0.58, y: height * 0.17))
-                path.addLine(to: CGPoint(x: width * 0.58, y: height * 0.22))
-                
-                // Shoulders
-                path.move(to: CGPoint(x: width * 0.3, y: height * 0.25))
-                path.addLine(to: CGPoint(x: width * 0.7, y: height * 0.25))
-                
-                // Arms (back)
-                path.move(to: CGPoint(x: width * 0.3, y: height * 0.25))
-                path.addLine(to: CGPoint(x: width * 0.2, y: height * 0.45))
-                path.addLine(to: CGPoint(x: width * 0.18, y: height * 0.65))
-                
-                path.move(to: CGPoint(x: width * 0.7, y: height * 0.25))
-                path.addLine(to: CGPoint(x: width * 0.8, y: height * 0.45))
-                path.addLine(to: CGPoint(x: width * 0.82, y: height * 0.65))
-                
-                // Torso (back)
-                path.move(to: CGPoint(x: width * 0.35, y: height * 0.25))
-                path.addLine(to: CGPoint(x: width * 0.35, y: height * 0.6))
-                path.addLine(to: CGPoint(x: width * 0.65, y: height * 0.6))
-                path.addLine(to: CGPoint(x: width * 0.65, y: height * 0.25))
-                path.closeSubpath()
-                
-                // Legs (back)
-                path.move(to: CGPoint(x: width * 0.4, y: height * 0.6))
-                path.addLine(to: CGPoint(x: width * 0.38, y: height * 0.95))
-                
-                path.move(to: CGPoint(x: width * 0.6, y: height * 0.6))
-                path.addLine(to: CGPoint(x: width * 0.62, y: height * 0.95))
-            }
-            .stroke(Color.black, lineWidth: 2)
-        }
-    }
-}
-
-struct MuscleOverlayView: View {
-    let muscleGroups: Set<MuscleGroup>
-    let isFront: Bool
-    
-    var body: some View {
-        GeometryReader { geometry in
-            ZStack {
-                if isFront {
-                    // Front muscle groups
-                    if muscleGroups.contains(.chest) {
-                        Rectangle()
-                            .fill(Color.red.opacity(0.4))
-                            .frame(width: geometry.size.width * 0.3, height: geometry.size.height * 0.15)
-                            .position(x: geometry.size.width * 0.5, y: geometry.size.height * 0.35)
-                    }
-                    if muscleGroups.contains(.shoulders) {
-                        Circle()
-                            .fill(Color.green.opacity(0.4))
-                            .frame(width: geometry.size.width * 0.15, height: geometry.size.height * 0.1)
-                            .position(x: geometry.size.width * 0.3, y: geometry.size.height * 0.28)
-                        Circle()
-                            .fill(Color.green.opacity(0.4))
-                            .frame(width: geometry.size.width * 0.15, height: geometry.size.height * 0.1)
-                            .position(x: geometry.size.width * 0.7, y: geometry.size.height * 0.28)
-                    }
-                    if muscleGroups.contains(.biceps) {
-                        Rectangle()
-                            .fill(Color.orange.opacity(0.4))
-                            .frame(width: geometry.size.width * 0.08, height: geometry.size.height * 0.2)
-                            .position(x: geometry.size.width * 0.2, y: geometry.size.height * 0.45)
-                        Rectangle()
-                            .fill(Color.orange.opacity(0.4))
-                            .frame(width: geometry.size.width * 0.08, height: geometry.size.height * 0.2)
-                            .position(x: geometry.size.width * 0.8, y: geometry.size.height * 0.45)
-                    }
-                    if muscleGroups.contains(.triceps) {
-                        Rectangle()
-                            .fill(Color.purple.opacity(0.4))
-                            .frame(width: geometry.size.width * 0.08, height: geometry.size.height * 0.2)
-                            .position(x: geometry.size.width * 0.2, y: geometry.size.height * 0.5)
-                        Rectangle()
-                            .fill(Color.purple.opacity(0.4))
-                            .frame(width: geometry.size.width * 0.08, height: geometry.size.height * 0.2)
-                            .position(x: geometry.size.width * 0.8, y: geometry.size.height * 0.5)
-                    }
-                    if muscleGroups.contains(.abs) {
-                        Rectangle()
-                            .fill(Color.pink.opacity(0.4))
-                            .frame(width: geometry.size.width * 0.25, height: geometry.size.height * 0.2)
-                            .position(x: geometry.size.width * 0.5, y: geometry.size.height * 0.5)
-                    }
-                    if muscleGroups.contains(.quads) {
-                        Rectangle()
-                            .fill(Color.cyan.opacity(0.4))
-                            .frame(width: geometry.size.width * 0.12, height: geometry.size.height * 0.25)
-                            .position(x: geometry.size.width * 0.4, y: geometry.size.height * 0.75)
-                        Rectangle()
-                            .fill(Color.cyan.opacity(0.4))
-                            .frame(width: geometry.size.width * 0.12, height: geometry.size.height * 0.25)
-                            .position(x: geometry.size.width * 0.6, y: geometry.size.height * 0.75)
-                    }
-                    if muscleGroups.contains(.calves) {
-                        Rectangle()
-                            .fill(Color.teal.opacity(0.4))
-                            .frame(width: geometry.size.width * 0.1, height: geometry.size.height * 0.15)
-                            .position(x: geometry.size.width * 0.38, y: geometry.size.height * 0.9)
-                        Rectangle()
-                            .fill(Color.teal.opacity(0.4))
-                            .frame(width: geometry.size.width * 0.1, height: geometry.size.height * 0.15)
-                            .position(x: geometry.size.width * 0.62, y: geometry.size.height * 0.9)
-                    }
-                } else {
-                    // Back muscle groups
-                    if muscleGroups.contains(.back) {
-                        Rectangle()
-                            .fill(Color.blue.opacity(0.4))
-                            .frame(width: geometry.size.width * 0.35, height: geometry.size.height * 0.3)
-                            .position(x: geometry.size.width * 0.5, y: geometry.size.height * 0.4)
-                    }
-                    if muscleGroups.contains(.shoulders) {
-                        Circle()
-                            .fill(Color.green.opacity(0.4))
-                            .frame(width: geometry.size.width * 0.15, height: geometry.size.height * 0.1)
-                            .position(x: geometry.size.width * 0.3, y: geometry.size.height * 0.28)
-                        Circle()
-                            .fill(Color.green.opacity(0.4))
-                            .frame(width: geometry.size.width * 0.15, height: geometry.size.height * 0.1)
-                            .position(x: geometry.size.width * 0.7, y: geometry.size.height * 0.28)
-                    }
-                    if muscleGroups.contains(.triceps) {
-                        Rectangle()
-                            .fill(Color.purple.opacity(0.4))
-                            .frame(width: geometry.size.width * 0.08, height: geometry.size.height * 0.2)
-                            .position(x: geometry.size.width * 0.2, y: geometry.size.height * 0.5)
-                        Rectangle()
-                            .fill(Color.purple.opacity(0.4))
-                            .frame(width: geometry.size.width * 0.08, height: geometry.size.height * 0.2)
-                            .position(x: geometry.size.width * 0.8, y: geometry.size.height * 0.5)
-                    }
-                    if muscleGroups.contains(.hamstrings) {
-                        Rectangle()
-                            .fill(Color.brown.opacity(0.4))
-                            .frame(width: geometry.size.width * 0.12, height: geometry.size.height * 0.25)
-                            .position(x: geometry.size.width * 0.4, y: geometry.size.height * 0.75)
-                        Rectangle()
-                            .fill(Color.brown.opacity(0.4))
-                            .frame(width: geometry.size.width * 0.12, height: geometry.size.height * 0.25)
-                            .position(x: geometry.size.width * 0.6, y: geometry.size.height * 0.75)
-                    }
-                    if muscleGroups.contains(.glutes) {
-                        Rectangle()
-                            .fill(Color.indigo.opacity(0.4))
-                            .frame(width: geometry.size.width * 0.25, height: geometry.size.height * 0.15)
-                            .position(x: geometry.size.width * 0.5, y: geometry.size.height * 0.6)
-                    }
-                    if muscleGroups.contains(.calves) {
-                        Rectangle()
-                            .fill(Color.teal.opacity(0.4))
-                            .frame(width: geometry.size.width * 0.1, height: geometry.size.height * 0.15)
-                            .position(x: geometry.size.width * 0.38, y: geometry.size.height * 0.9)
-                        Rectangle()
-                            .fill(Color.teal.opacity(0.4))
-                            .frame(width: geometry.size.width * 0.1, height: geometry.size.height * 0.15)
-                            .position(x: geometry.size.width * 0.62, y: geometry.size.height * 0.9)
-                    }
-                }
-            }
+            .toolbarBackground(.hidden, for: .navigationBar)
         }
     }
 }
 
 #Preview {
     BodyDiagramView(workout: Workout(name: "Upper Day 1", exercises: [
-        Exercise(name: "Bench Press", muscleGroups: [.chest, .triceps, .shoulders])
+        Exercise(name: "Incline Bench Press", muscleGroups: [.chest, .triceps, .shoulders], detailedMuscles: [.upperChest, .anteriorDeltoids, .triceps])
     ]))
 }
-

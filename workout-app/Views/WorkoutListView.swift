@@ -6,25 +6,54 @@ struct WorkoutListView: View {
     
     var body: some View {
         NavigationView {
-            List {
-                ForEach(dataStore.workouts) { workout in
-                    NavigationLink(destination: WorkoutDetailView(workout: workout)) {
-                        VStack(alignment: .leading, spacing: 4) {
-                            Text(workout.name)
-                                .font(.headline)
-                            Text("\(workout.exercises.count) exercises")
-                                .font(.caption)
-                                .foregroundColor(.secondary)
+            ZStack {
+                // Dark background
+                Color.black.ignoresSafeArea()
+                
+                if dataStore.workouts.isEmpty {
+                    VStack(spacing: 20) {
+                        Image(systemName: "dumbbell.fill")
+                            .font(.system(size: 60))
+                            .foregroundColor(.gray.opacity(0.5))
+                        Text("No Workouts Yet")
+                            .font(.system(size: 24, weight: .semibold, design: .rounded))
+                            .foregroundColor(.white)
+                        Text("Tap the + button to create your first workout")
+                            .font(.subheadline)
+                            .foregroundColor(.gray)
+                            .multilineTextAlignment(.center)
+                            .padding(.horizontal)
+                    }
+                } else {
+                    List {
+                        ForEach(dataStore.workouts) { workout in
+                            NavigationLink(destination: WorkoutDetailView(workout: workout)) {
+                                WorkoutCard(workout: workout)
+                            }
+                            .listRowBackground(Color.clear)
+                            .listRowSeparator(.hidden)
+                            .swipeActions(edge: .trailing, allowsFullSwipe: true) {
+                                Button(role: .destructive) {
+                                    withAnimation {
+                                        dataStore.deleteWorkout(workout)
+                                    }
+                                } label: {
+                                    Label("Delete", systemImage: "trash")
+                                }
+                            }
                         }
                     }
+                    .listStyle(.plain)
+                    .scrollContentBackground(.hidden)
+                    .padding(.top, 8)
                 }
-                .onDelete(perform: deleteWorkouts)
             }
             .navigationTitle("My Workouts")
             .toolbar {
                 ToolbarItem(placement: .navigationBarTrailing) {
                     Button(action: { showingAddWorkout = true }) {
                         Image(systemName: "plus")
+                            .foregroundColor(.white)
                     }
                 }
             }
@@ -33,11 +62,34 @@ struct WorkoutListView: View {
             }
         }
     }
+}
+
+struct WorkoutCard: View {
+    let workout: Workout
     
-    private func deleteWorkouts(at offsets: IndexSet) {
-        for index in offsets {
-            dataStore.deleteWorkout(dataStore.workouts[index])
+    var body: some View {
+        HStack(spacing: 16) {
+            VStack(alignment: .leading, spacing: 4) {
+                Text(workout.name)
+                    .font(.system(size: 18, weight: .semibold, design: .rounded))
+                    .foregroundColor(.white)
+                
+                Text("\(workout.exercises.count) exercises")
+                    .font(.system(size: 14, weight: .regular))
+                    .foregroundColor(.gray)
+            }
+            
+            Spacer()
+            
+            Image(systemName: "chevron.right")
+                .font(.caption)
+                .foregroundColor(.gray.opacity(0.5))
         }
+        .padding(16)
+        .background(
+            RoundedRectangle(cornerRadius: 12)
+                .fill(Color(white: 0.15))
+        )
     }
 }
 
@@ -45,4 +97,3 @@ struct WorkoutListView: View {
     WorkoutListView()
         .environmentObject(WorkoutDataStore())
 }
-
